@@ -1,4 +1,4 @@
-package com.excelmetadata.excelpasswordremover.datamodel;
+package com.excelmetadata.excelhandler.datamodel;
 
 import org.apache.poi.poifs.crypt.HashAlgorithm;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -23,7 +23,7 @@ public class ExcelPasswordRemover {
      * @return          true if the operation was successful, false otherwise.
      * @throws IOException
      */
-    public boolean removeExcelPassword(String filePath)
+    public static boolean removeExcelPassword(String filePath)
             throws IOException {
 
         if(!isValidFilePath(filePath)) {
@@ -68,7 +68,7 @@ public class ExcelPasswordRemover {
      * @param filePath  The full file path as a String
      * @return          true if the file with the specified path exists, false if it doesn't
      */
-    private boolean isValidFilePath(String filePath) {
+    private static boolean isValidFilePath(String filePath) {
         File file = new File(filePath);
         return file.exists() && file.isFile();
     }
