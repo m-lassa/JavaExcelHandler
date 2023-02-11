@@ -1,4 +1,4 @@
-package com.excelmetadata.excelpasswordremover.datamodel;
+package com.excelmetadata.excelhandler.datamodel;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class FileBackupHandler {
      * @param filePath  The full file path as a String
      * @return          true if the backup operation was successful, false otherwise.
      */
-    public boolean backupFile(String filePath) {
+    public static boolean backupFile(String filePath) {
         if(!isValidFilePath(filePath)) {
             System.out.println("Please input a correct file path.");
             return false;
@@ -59,7 +59,7 @@ public class FileBackupHandler {
      * @return          true if the file with the specified path exists, false if it doesn't
      */
 
-    private boolean isValidFilePath(String filePath) {
+    private static boolean isValidFilePath(String filePath) {
         File file = new File(filePath);
         return file.exists() && file.isFile();
     }

@@ -1,14 +1,21 @@
-package com.excelmetadata.excelpasswordremover;
+package com.excelmetadata.excelhandler;
 
-import com.excelmetadata.excelpasswordremover.datamodel.ExcelPasswordRemover;
-import com.excelmetadata.excelpasswordremover.datamodel.FileBackupHandler;
+import com.excelmetadata.excelhandler.datamodel.ExcelPasswordRemover;
+import com.excelmetadata.excelhandler.datamodel.FileBackupHandler;
+import com.excelmetadata.excelhandler.datamodel.MetadataHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Controller {
@@ -22,7 +29,7 @@ public class Controller {
 
     /**
      * Method called when the user clicks on the Back Up File button.
-     * It creates an instance of the FileBackupHandler class and calls its backupFile method.
+     * It calls the backupFile method of the FileBackupHandler class.
      * Alerts are displayed to the user in case of successful/unsuccessful operations.
      */
     @FXML
@@ -30,17 +37,16 @@ public class Controller {
         String filePath = filePathTextField.getText();
         String fileName = fileNameTextField.getText();
         String fullFilePath = filePath + File.separator + fileName;
-        FileBackupHandler backupHandler = new FileBackupHandler();
         boolean isBackedUp;
 
-        if (filePath.trim().equals("") || fileName.trim().equalsIgnoreCase("")){
+        if (filePath.trim().equalsIgnoreCase("") || fileName.trim().equalsIgnoreCase("")){
             Alert emptyFieldAlert = new Alert(Alert.AlertType.INFORMATION);
             emptyFieldAlert.setTitle("No File Path and/or File Name");
             emptyFieldAlert.setHeaderText(null);
             emptyFieldAlert.setContentText("Please insert a valid file path and name.");
             emptyFieldAlert.showAndWait();
         } else {
-            isBackedUp = backupHandler.backupFile(fullFilePath);
+            isBackedUp = FileBackupHandler.backupFile(fullFilePath);
             if(!isBackedUp){
                 Alert wrongPathAlert = new Alert(Alert.AlertType.ERROR);
                 wrongPathAlert.setContentText("Error backing up file. Directory or file do not exist");
@@ -80,7 +86,7 @@ public class Controller {
 
     /**
      * Method called when the user clicks on the Remove Spreadsheet Password button.
-     * It creates an instance of the ExcelPasswordRemover class and calls its removeExcelPassword method.
+     * It calls the removeExcelPassword method of the ExcelPasswordRemover class.
      * Alerts are displayed to the user in case of successful/unsuccessful operations.
      */
     @FXML
@@ -88,10 +94,9 @@ public class Controller {
         String filePath = filePathTextField.getText();
         String fileName = fileNameTextField.getText();
         String fullFilePath = filePath + File.separator + fileName;
-        ExcelPasswordRemover passwordRemover = new ExcelPasswordRemover();
         boolean passRemoved;
         try{
-            passRemoved = passwordRemover.removeExcelPassword(fullFilePath);
+            passRemoved = ExcelPasswordRemover.removeExcelPassword(fullFilePath);
             if(!passRemoved){
                 Alert incorrectRemovalAlert = new Alert(Alert.AlertType.ERROR);
                 incorrectRemovalAlert.setContentText("Error removing workbook or worksheet password. \nEnsure the file has .xlsx or .xls as extension");
@@ -105,6 +110,54 @@ public class Controller {
             }
         } catch (IOException e){
             e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Method called when the user clicks on the Display Excel Metadata button.
+     * It creates an instance of the MetadataHandler class and calls its displayProperties method.
+     * The metadata of the selected Excel file is dispplayed on a separate window.
+     * Alerts are displayed to the user in case of successful/unsuccessful operations.
+     */
+    @FXML
+    private void viewMetadata(){
+        String filePath = filePathTextField.getText();
+        String fileName = fileNameTextField.getText();
+        String fullFilePath = filePath + File.separator + fileName;
+
+        if (fullFilePath != null) {
+            try (FileInputStream inputStream = new FileInputStream(fullFilePath)) {
+                XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+                StringBuilder properties = new StringBuilder();
+
+                properties.append("\n\n");
+                MetadataHandler metadata = new MetadataHandler();
+                properties.append(metadata.displayProperties(fullFilePath));
+
+                Label propertiesLabel = new Label(properties.toString());
+
+                VBox root = new VBox(propertiesLabel);
+                Scene scene = new Scene(root, 450, 400);
+                Stage stage = new Stage();
+                stage.setScene(scene);
+                stage.setTitle("Document Properties");
+                stage.show();
+            } catch (FileNotFoundException e){
+                Alert emptyFieldAlert = new Alert(Alert.AlertType.INFORMATION);
+                emptyFieldAlert.setTitle("No File Path and/or File Name");
+                emptyFieldAlert.setHeaderText(null);
+                emptyFieldAlert.setContentText("Please insert a valid file path and name.");
+                emptyFieldAlert.showAndWait();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Alert emptyFieldAlert = new Alert(Alert.AlertType.INFORMATION);
+            emptyFieldAlert.setTitle("No File Path and/or File Name");
+            emptyFieldAlert.setHeaderText(null);
+            emptyFieldAlert.setContentText("Please insert a valid file path and name.");
+            emptyFieldAlert.showAndWait();
         }
     }
 
